@@ -8,7 +8,6 @@
 #include "samples.h"
 #include <rtems/test.h>
 #include <rtems/status-checks.h>
-//#include <bsp/gpio.h> /* Calls the BSP gpio library */
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -39,18 +38,18 @@ int LoopCountingForASec(void)
     sec_ticks = rtems_clock_get_ticks_per_second();
 
     while(1){
-	loopInterLoop+=1;
-	if(loopInterLoop > 500000){
-	    loopcount+=1;
-	    loopInterLoop = 0;
-	}
-	
-	loopcountpersec = loopcount*500000 + loopInterLoop;
-	now = rtems_clock_get_ticks_since_boot();
-	if(now - start == sec_ticks){
-            //printf("LoopCount (500000) for one sec is %d", loopcount);
-	    break;
-	}
+        loopInterLoop+=1;
+        if(loopInterLoop > 500000){
+            loopcount+=1;
+            loopInterLoop = 0;
+        }
+        
+        loopcountpersec = loopcount*500000 + loopInterLoop;
+        now = rtems_clock_get_ticks_since_boot();
+        if(now - start == sec_ticks){
+                  //printf("LoopCount (500000) for one sec is %d", loopcount);
+            break;
+        }
     }
     
     loopcountpersec = loopcount*500000 + loopInterLoop;
@@ -67,9 +66,9 @@ bool task_fault_check(double factor)
   fault_rand = rand()%100000;
 	  
   if(fault_rand < trial)
-		return TRUE; 
+      return TRUE; 
   else
-    return FALSE;
+      return FALSE;
 }
 
 bool check_R_table(int detectIdx, int nTask)
@@ -80,78 +79,68 @@ bool check_R_table(int detectIdx, int nTask)
 	//OnlineDetectiveK2U(detectIdx, taskrunning_table, sp_dl_missed_table, d_t, tsk, nTask);
 	
 	for(i=0; i<nTask; i++){		
-		sum = sum + sp_dl_missed_table[i];
+      sum = sum + sp_dl_missed_table[i];
 	}
 	
 	if(sum==0)
-		return TRUE;
+      return TRUE;
 	else
-		return FALSE;
+      return FALSE;
 
 }
 bool check_busyP(int detectIdx, int nTask)
 {
-	int sum = 0;
-	int i = 0;
-	double busy = 0;
-	double Dn = 0;
-	double sumU=0;
-	double sumF=0;
-	int j=0;
-	//printf("task %d faults, check %d to n tasks\n", detectIdx+1, detectIdx+1);
+  //KHCHEN: fix the busyperiod prediction after discussing with Georg
+  //TODO build up the input of x and y.
+	int sum = 0, i = 0, j=0;
+	double busy = 0, Dn = 0, sumU=0, sumF=0;
 
 	for(i=detectIdx; i<nTask; i++) //test from detectIdx to so-on, as detectIdx task is affected.
 	{
-		double carry_in = 0;
-		if(tsk[i].task_type == 0) //hard task no needs to monitor
-			continue;
-		else{
-			Dn = tsk[i].period;
-			sumU=0;
-			sumF=0;
-			/* February
-			for(j=0; j<=i; j++)//calculate all high priority tasks' properties + itself
-			{
-				sumU+=(tsk[j].normal_et/tsk[j].period);
-				sumF+=(1-tsk[j].normal_et/tsk[j].period)*tsk[j].normal_et;
-			}
-			if(i == detectIdx)
-				busy = (tsk[i].abnormal_et-tsk[i].normal_et+sumF)/(1-sumU);
-			else
-				busy = (tsk[i].abnormal_et+sumF)/(1-sumU);
-			*/
-			//after RTSS fix
-			for(j=0; j<=i; j++)//calculate all high priority tasks' properties + itself
-			{
-			//TODO CHECK BUSYP CALCULATION
-				sumU+=(tsk[j].normal_et/tsk[j].period);
-				sumF+=(1-tsk[j].normal_et/tsk[j].period)*tsk[j].normal_et;
-				
-        if(tsk[j].task_type != 0){
-          if(j == detectIdx){ //fault on itself, plus the remaining time
-					  carry_in += (tsk[j].abnormal_et-tsk[j].normal_et);
-				  }else if(j > detectIdx){ //for detectIdx to task i, assume those lower priority are already executed.
-					  carry_in += (tsk[j].abnormal_et);
-				  }
-        }
-			}
+      double carry_in = 0;
+      if(tsk[i].task_type == 0) //hard task no needs to monitor
+          continue;
+      else{
+          Dn = tsk[i].period;
+          sumU=0;
+          sumF=0;
+          //virtual task k' Ck'=Gk
+          for(j=0; j<=i; j++)//calculate all high priority tasks' properties + itself
+          {
+              sumU+=(tsk[j].normal_et/tsk[j].period);
+              sumF+=(1-tsk[j].normal_et/tsk[j].period)*tsk[j].normal_et;
+          }  
+          for(j=detectIdx; j<=i; j++) //(check the ready queue. X is the number of normal instance, Y is the number of abnormal instance.
+          {
+              if(j == detectIdx)
+              {
+                  carry_in += (tsk[j].abnormal_et-tsk[j].normal_et);
+              }
+              else
+              {
+                  if(tsk[j].tsk_type == 0 && x+y >1)
+                      printf("BUG: more than one hard job in the system");
 
-			busy = (carry_in+sumF)/(1-sumU); //eq. 6
-				
-			//printf("BUSY %lf tsk %d:Dn %lf\n",busy, i, tsk[i].period); 
-        
-			if(busy > Dn) //system fails
-				sp_dl_missed_table[i]=1;
-		}
+                  if(tsk[j].tsk_type == 1 && y > 1)
+                      printf("BUG: soft task at most has one abnormal in the system");
+                  carry_in += y*tsk[j].abnormal_et+x*tsk[j].normal_et;
+              }
+          }
+
+          busy = (carry_in+sumF)/(1-sumU); //eq. 6
+            
+          if(busy > Dn) //if WCRT in the busy period is larger than the task deadline, mark it as suspecious.
+              sp_dl_missed_table[i]=1;
+      }
 	}
 	for(i=0; i<nTask; i++){
-		sum = sum + sp_dl_missed_table[i];
+      sum = sum + sp_dl_missed_table[i];
 	}
 	if(sum == 0){
-		return TRUE;
+      return TRUE;
 	}
 	else
-		return FALSE;
+      return FALSE;
 
 }
 
@@ -388,33 +377,33 @@ double RTA(int curIdx, attri* tasks, int nTask, int mode)
 	int i=0;
 	double t = tasks[curIdx].normal_et; 	
 	if(mode == 1)
-            t = tasks[curIdx].abnormal_et;
-        for(i=0; i<ntask; i++)
-        {
-		if(i != curIdx && tasks[i].priority==-1){
-			if(mode ==0)
-		                t += tasks[i].normal_et;
-			else
-		                t += tasks[i].abnormal_et;
-		}
-        }
+      t = tasks[curIdx].abnormal_et;
+  for(i=0; i<ntask; i++)
+  {
+      if(i != curIdx && tasks[i].priority==-1){
+          if(mode ==0)
+              t += tasks[i].normal_et;
+          else
+              t += tasks[i].abnormal_et;
+      }
+  }
 
 //	printf("task %d t=%lf\n", curIdx+1, t);
         //recursive TDA
 	while(t < Dn)
 	{	
-		if(mode == 0) //0 is soft task checking normal execution time
-			dm=norDemand(t, tasks, nTask, curIdx);
-		else
-			dm=abnorDemand(t, tasks, nTask, curIdx);
-		if (dm <= t){
-//			printf("Feasible t %lf\n", t);
-			return t;
-		}
-		else{
-//			printf("Demand is larger than the current t=%lf, dm=%lf\n", t, dm);
-			t = dm;
-		}
+      if(mode == 0) //0 is soft task checking normal execution time
+          dm=norDemand(t, tasks, nTask, curIdx);
+      else
+          dm=abnorDemand(t, tasks, nTask, curIdx);
+      if (dm <= t){
+  //			printf("Feasible t %lf\n", t);
+        return t;
+      }
+      else{
+  //			printf("Demand is larger than the current t=%lf, dm=%lf\n", t, dm);
+        t = dm;
+      }
 	}
 //	printf("task %d fails to schedule, t=%lf\n", curIdx+1, t);
 	return 0; //fail
@@ -465,52 +454,11 @@ int findAssignment(attri* tasks, attri* hardTasks, attri* softTasks, int nTask, 
 
 int priority_assignment(attri* tasks, int nTask)
 {
-
+  //assume the given input is already assigned priority.
 	int i =0;
-#if 0 //due to the fact that Georg already did the priorities assignments.
-	//if return -1, it means it is not possible to be feasible.
-	int hardcount=0, softcount=0;
-	int hardidx = 0, softidx = 0;
-	//int i=0;
-	attri* hardTasks;
-	attri* softTasks;
-	for(i=0; i<nTask; i++){
-		if (tasks[i].task_type == 0)
-			hardcount +=1;
-		else
-			softcount +=1;
-	} //find out how many tasks are there.
-	hardTasks = (attri*)calloc(hardcount, sizeof(attri));
-	softTasks = (attri*)calloc(softcount, sizeof(attri));
-	for(i=0; i<nTask; i++){
-		if (tasks[i].task_type == 0)
-			hardTasks[hardidx++] = tasks[i];
-		else
-			softTasks[softidx++] = tasks[i];
-	} //put those in the set.
-	qsort(hardTasks, hardcount, sizeof(attri), comparePeriod);
-	qsort(softTasks, softcount, sizeof(attri), comparePeriod);
-/*
-	printf("%d, %d\n", hardcount, softcount);
-        for(i=0; i<hardcount; i++)
-                printf("%lf\n", hardTasks[i].period);
-
-        for(i=0; i<softcount; i++)
-                printf("%lf\n", softTasks[i].period);
-*/	
-	int status = findAssignment(tasks, hardTasks, softTasks, nTask, hardcount, softcount);
-	if (status == -1) return status;
-/*
-	for(i=0; i<nTask; i++){
-		printf("Task %d has period of %lf second with priority %d.\n",tasks[i].id+1, tasks[i].period, tasks[i].priority);
-	}
-*/
-	qsort(tasks, nTask, sizeof(attri), comparePriority);
-#endif
 	for(i=0; i<nTask; i++){
 		tasks[i].id=i; //very important
 		tasks[i].priority=i+1;
-//		printf("Task %d has period of %lf second with priority %d.\n",tasks[i].id+1, tasks[i].period, tasks[i].priority);
 	}
 
 	return 1;
@@ -526,24 +474,24 @@ void Random_Generate_Task_Type(int nTask, double desired_hardrealtime_percentage
 
         hardRTtask_total = nTask*desired_hardrealtime_percentage;
         softRTtask_total = nTask-hardRTtask_total;
-	printf("Random Task type: hard = %d, soft = %d\n", hardRTtask_total, softRTtask_total);
+        printf("Random Task type: hard = %d, soft = %d\n", hardRTtask_total, softRTtask_total);
 
         for(i = 0; i<nTask; i++){
                 if(hardcount < hardRTtask_total && softcount < softRTtask_total){
-                        val=rand()%2;
-                        if(val == 0){
-                                tasks[i].task_type = 0;
-                                hardcount++;
-                        }else{
-                                tasks[i].task_type = 1;
-                                softcount++;
-                        }
+                    val=rand()%2;
+                    if(val == 0){
+                        tasks[i].task_type = 0;
+                        hardcount++;
+                    }else{
+                        tasks[i].task_type = 1;
+                        softcount++;
+                    }
                 }else if(hardcount >= hardRTtask_total){
-                                tasks[i].task_type = 1;
-                                softcount++;
+                    tasks[i].task_type = 1;
+                    softcount++;
                 }else if(softcount >= softRTtask_total){
-                                tasks[i].task_type = 0;
-                                hardcount++;
+                    tasks[i].task_type = 0;
+                    hardcount++;
                 }
         }
 
@@ -552,11 +500,11 @@ void Random_Generate_Task_Type(int nTask, double desired_hardrealtime_percentage
 void Exhaustive_Task_Type(int nTask, int decimal, attri* tasks){
 	int i, binary[5];
 	for(i=1;i<=nTask;i++){
-		binary[nTask-i]=decimal%2;
-		decimal=decimal/2;
+      binary[nTask-i]=decimal%2;
+      decimal=decimal/2;
 	}	
 	for(i=0; i<nTask; i++)		
-		tasks[i].task_type=binary[i];
+      tasks[i].task_type=binary[i];
 }
 
 int check_running_task(int* suspendedTask){
@@ -565,12 +513,12 @@ int check_running_task(int* suspendedTask){
 	int numberPreemptedTask = 0;
 
 	for(j=0; j<ntask; j++){
-		numberPreemptedTask += taskrunning_table[j];
+      numberPreemptedTask += taskrunning_table[j];
 		
-		if(taskrunning_table[j] == 1){
-			suspendedTask[i] = j;
-			i++;
-		}
+      if(taskrunning_table[j] == 1){
+          suspendedTask[i] = j;
+          i++;
+      }
 	}
 	
 	return numberPreemptedTask;
