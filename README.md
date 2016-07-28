@@ -4,7 +4,7 @@ Created on: July 27, 2016
 
 This is a repository of storing a RTEMS example for RTSS'16 paper.
 
-We use the latest version of RTEMS source tree. (4.12 toolchain from RSB)
+We use 4280dff7cfbc7c14c4231ac68637650f39f792b1 version of RTEMS source tree. (4.12 toolchain from RSB)
 
 This folder is prepared to patch the RTEMS source tree under this path "testsuites/samples/"
 All the related Makefile.am and configure.ac files are also required to be revised accordingly.
