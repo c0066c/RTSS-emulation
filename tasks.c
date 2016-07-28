@@ -156,7 +156,7 @@ rtems_task Task_1(
 				if(sys_stop_flag == TRUE)
 					printf("Failed to meet deadline.\n");
 
-				//printf("Total system runtime is %.6f second.\n", sys_totalruntime);
+			  //printf("Total system runtime is %.6f second.\n", sys_totalruntime);
 				//printf("Total system runtime in healthy condition is %.6f second and its percentage is %.3f.\n",sys_healthy_total_duration,sys_totalhealthy_percentage);
 				//printf("Total system runtime in unhealthy condition is %.6f second and its percentage is %.3f.\n", sys_unhealthy_total_duration, sys_totalunhealthy_percentage);
 				printf("\nSystem healthy percentage is %.6f ",sys_totalhealthy_percentage);
@@ -217,7 +217,7 @@ rtems_task Task_1(
 				first_task_flag = TRUE;
 	    		}
 
-	    		//printf("Task 1 starts current second %.6f.\n", start);
+//	    		printf("Task 1 starts current second %.6f.\n", start);
 
 			LOOP(task_1_normal_et,task_id);
 			//LOOPA(task_1_normal_et);
@@ -252,7 +252,7 @@ rtems_task Task_1(
 
 			end = rtems_clock_get_ticks_since_boot()/(double)tick_per_second;
 
-			//printf("					Task 1 ends at current second  %.6f .\n", end);
+//			printf("					Task 1 ends at current second  %.6f .\n", end);
 			deadline = first_start + (tsk_counter +1)*PERIOD_TASK_1;
 			stop_sys = check_deadline(&first_task_flag ,nTask, deadline, end, task_type, task_id, tick_per_second, &meet);
       
@@ -378,7 +378,7 @@ rtems_task Task_2(
 				task_running_flag = TRUE;
 				first_task_flag = TRUE;
 			}
-			//printf("Task 2 starts at current second %.6f.\n", start);
+//			printf("Task 2 starts at current second %.6f.\n", start);
 
 			//LOOPA(task_2_normal_et);
 			LOOP(task_2_normal_et,task_id);
@@ -418,7 +418,7 @@ rtems_task Task_2(
 
 			end = rtems_clock_get_ticks_since_boot()/(double)tick_per_second;
 
-			//printf("					Task 2 ends at current second %.6f.\n", end);
+//			printf("					Task 2 ends at current second %.6f.\n", end);
 
 			deadline = first_start + (tsk_counter +1)*PERIOD_TASK_2;
 
@@ -562,7 +562,7 @@ rtems_task Task_3(
 				first_task_flag = TRUE;
 			}
 
-			//printf("Task 3 starts at current second %.6f.\n", start);
+//			printf("Task 3 starts at current second %.6f.\n", start);
 	  
 			//LOOP(task_3_normal_et);    
 			LOOP(task_3_normal_et,task_id);
@@ -601,7 +601,7 @@ rtems_task Task_3(
 
 			end = rtems_clock_get_ticks_since_boot() / (double)tick_per_second;
 
-		//	printf("					Task 3 ends at current second %.6f.\n", end);
+//		printf("					Task 3 ends at current second %.6f.\n", end);
 
 			deadline = first_start + (tsk_counter +1)*PERIOD_TASK_3;
 
@@ -743,7 +743,7 @@ rtems_task Task_4(
 				first_task_flag = TRUE;
 			}
 
-			//printf("Task 4 starts at current second %.6f.\n", start);
+//			printf("Task 4 starts at current second %.6f.\n", start);
 
 			//LOOP(task_4_normal_et);   
 			LOOP(task_4_normal_et,task_id);
@@ -783,7 +783,7 @@ rtems_task Task_4(
 
 			end = rtems_clock_get_ticks_since_boot()/(double)tick_per_second;
 
-			//printf("					Task 4 ends at current second %.6f.\n", end);
+//			printf("					Task 4 ends at current second %.6f.\n", end);
 	 
 			deadline = first_start + (tsk_counter +1)*PERIOD_TASK_4;
 
@@ -924,7 +924,7 @@ rtems_task Task_5(
 				first_task_flag = TRUE;
 			}
 
-			//printf("Task 5 starts at current second %.6f.\n", start);
+//			printf("Task 5 starts at current second %.6f.\n", start);
 	  
 			//LOOP(task_5_normal_et);    
 			LOOP(task_5_normal_et,task_id);
@@ -963,7 +963,7 @@ rtems_task Task_5(
 
 			end = rtems_clock_get_ticks_since_boot() / (double)tick_per_second;
 
-			//printf("					Task 5 ends at current second %.6f. \n", end);
+//			printf("					Task 5 ends at current second %.6f. \n", end);
 
 			deadline = first_start + (tsk_counter +1)*PERIOD_TASK_5;
 
@@ -1104,7 +1104,7 @@ rtems_task Task_6(
 				first_task_flag = TRUE;
 			}
 	 
-			//printf("Task 6 starts at current second %.6f.\n", start);
+//			printf("Task 6 starts at current second %.6f.\n", start);
 
 			//LOOP(task_6_normal_et);   
 			LOOP(task_6_normal_et,task_id);
@@ -1144,7 +1144,7 @@ rtems_task Task_6(
 
 			end = rtems_clock_get_ticks_since_boot()/(double)tick_per_second;
 
-			//printf("					Task 6 ends at current second %.6f.\n", end);
+//			printf("					Task 6 ends at current second %.6f.\n", end);
 	 
 			deadline = first_start + (tsk_counter +1)*PERIOD_TASK_6;
 
@@ -1285,7 +1285,7 @@ rtems_task Task_7(
 				first_task_flag = TRUE;
 			}
 
-			//printf("Task 7 starts at current second %.6f. \n", start);
+//			printf("Task 7 starts at current second %.6f. \n", start);
 	  
 			//LOOP(task_7_normal_et);    
 			LOOP(task_7_normal_et,task_id);
@@ -1324,7 +1324,7 @@ rtems_task Task_7(
 
 			end = rtems_clock_get_ticks_since_boot() / (double)tick_per_second;
 
-			//printf("					Task 7 ends at current second %.6f. \n", end);
+//			printf("					Task 7 ends at current second %.6f. \n", end);
 
 			deadline = first_start + (tsk_counter +1)*PERIOD_TASK_7;
 
@@ -1465,7 +1465,7 @@ rtems_task Task_8(
 				first_task_flag = TRUE;
 			}
 
-			//printf("Task 8 starts at current second %.6f.\n", start);
+//			printf("Task 8 starts at current second %.6f.\n", start);
 
 			//LOOP(task_8_normal_et);   
 			LOOP(task_8_normal_et,task_id);
@@ -1505,7 +1505,7 @@ rtems_task Task_8(
 
 			end = rtems_clock_get_ticks_since_boot()/(double)tick_per_second;
 
-			//printf("					Task 8 ends at current second %.6f.\n", end);
+//			printf("					Task 8 ends at current second %.6f.\n", end);
 	 
 			deadline = first_start + (tsk_counter +1)*PERIOD_TASK_8;
 
@@ -1646,7 +1646,7 @@ rtems_task Task_9(
 				first_task_flag = TRUE;
 			}
 
-			//printf("Task 9 starts at current second %.6f. \n", start);
+//			printf("Task 9 starts at current second %.6f. \n", start);
 	  
 			//LOOP(task_9_normal_et);    
 			LOOP(task_9_normal_et,task_id);
@@ -1685,7 +1685,7 @@ rtems_task Task_9(
 
 			end = rtems_clock_get_ticks_since_boot() / (double)tick_per_second;
 
-			//printf("					Task 9 ends at current second %.6f. \n", end);
+//			printf("					Task 9 ends at current second %.6f. \n", end);
 
 			deadline = first_start + (tsk_counter +1)*PERIOD_TASK_9;
 
@@ -1827,7 +1827,7 @@ rtems_task Task_10(
 				first_task_flag = TRUE;
 			}
 
-			//printf("Task 10 starts at current second %.6f.\n", start);
+//			printf("Task 10 starts at current second %.6f.\n", start);
 
 			//LOOPA(task_10_normal_et);
 			LOOP(task_10_normal_et,task_id);
@@ -1867,7 +1867,7 @@ rtems_task Task_10(
 
 			end = rtems_clock_get_ticks_since_boot()/(double)tick_per_second;
 
-			//printf("					%d Task 10 ends at current second %.6f.\n", tsk_counter+1, end);
+//			printf("					%d Task 10 ends at current second %.6f.\n", tsk_counter+1, end);
 	    
 			deadline = first_start + (tsk_counter +1)*PERIOD_TASK_10;
 

@@ -121,18 +121,16 @@ bool check_busyP(int detectIdx, int nTask)
 				busy = (tsk[i].abnormal_et+sumF)/(1-sumU);
 			*/
 			//after RTSS fix
-			for(j=0; j<=i; j++)//calculate all high priority tasks' properties + itself
+			for(j=detectIdx; j<=i; j++)//calculate all high priority tasks' properties + itself
 			{
 			//TODO CHECK BUSYP CALCULATION
 				sumU+=(tsk[j].normal_et/tsk[j].period);
 				sumF+=(1-tsk[j].normal_et/tsk[j].period)*tsk[j].normal_et;
 				
-        if(tsk[j].task_type != 0){
-          if(j == detectIdx){ //fault on itself, plus the remaining time
-					  carry_in += (tsk[j].abnormal_et-tsk[j].normal_et);
-				  }else if(j > detectIdx){ //for detectIdx to task i, assume those lower priority are already executed.
-					  carry_in += (tsk[j].abnormal_et);
-				  }
+        if(j == detectIdx){ //fault on itself, plus the remaining time
+				  carry_in += (tsk[j].abnormal_et-tsk[j].normal_et);
+			  }else if(j > detectIdx){ //for detectIdx to task i, assume those lower priority are already executed.
+				  carry_in += (tsk[j].abnormal_et);				 
         }
 			}
 
