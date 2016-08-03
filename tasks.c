@@ -126,6 +126,9 @@ rtems_task Task_1(
     exit(1);
   }
 
+  //KHCHEN 03.08, record the period ID for helper function
+  period_id[0] = RM_period;
+
 	while( 1 ) {
 
     /*this part for release offset*/
@@ -319,6 +322,9 @@ rtems_task Task_2(
     exit(1);
   }
 
+  //KHCHEN 03.08, record the period ID for helper function
+  period_id[1] = RM_period;
+
 	while( 1 ) {
  
     /*this part for release offset*/
@@ -501,6 +507,9 @@ rtems_task Task_3(
     exit(1);
   }
 
+  //KHCHEN 03.08, record the period ID for helper function
+  period_id[2] = RM_period;
+
 	while( 1 ) {
 
     /*this part for release offset*/
@@ -681,6 +690,9 @@ rtems_task Task_4(
     printf("RM failed with status: %d\n", status);
     exit(1);
   }
+
+  //KHCHEN 03.08, record the period ID for helper function
+  period_id[3] = RM_period;
 
 	while( 1 ) {
  
@@ -864,6 +876,9 @@ rtems_task Task_5(
     exit(1);
   }
 
+  //KHCHEN 03.08, record the period ID for helper function
+  period_id[4] = RM_period;
+
 	while( 1 ) {
 
 		/*this part for release offset*/
@@ -1045,6 +1060,9 @@ rtems_task Task_6(
     exit(1);
   }
 
+  //KHCHEN 03.08, record the period ID for helper function
+  period_id[5] = RM_period;
+
 	while( 1 ) {
  
 		/*this part for release offset*/
@@ -1225,6 +1243,9 @@ rtems_task Task_7(
     exit(1);
   }
 
+  //KHCHEN 03.08, record the period ID for helper function
+  period_id[6] = RM_period;
+
 	while( 1 ) {
 
 		/*this part for release offset*/
@@ -1404,6 +1425,10 @@ rtems_task Task_8(
     printf("RM failed with status: %d\n", status);
     exit(1);
   }
+
+
+  //KHCHEN 03.08, record the period ID for helper function
+  period_id[7] = RM_period;
 
 	while( 1 ) {
  
@@ -1586,6 +1611,9 @@ rtems_task Task_9(
     exit(1);
   }
 
+  //KHCHEN 03.08, record the period ID for helper function
+  period_id[8] = RM_period;
+
 	while( 1 ) {
 
 		/*this part for release offset*/
@@ -1766,6 +1794,9 @@ rtems_task Task_10(
     printf("RM failed with status: %d\n", status);
     exit(1);
   }
+
+  //KHCHEN 03.08, record the period ID for helper function
+  period_id[9] = RM_period;
 
 	while( 1 ) {
  

@@ -14,6 +14,9 @@
 #include <stdlib.h>
 #define UT 50
 
+//KHCHEN 03.08 Global table for period ID
+rtems_id Period_id[11];
+
 int task_set_idx = 0;
 int task_set_idcheck = 100;
 int running_flag[10] = {0,0,0,0,0,0,0,0,0,0};

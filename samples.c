@@ -91,7 +91,17 @@ bool check_R_table(int detectIdx, int nTask)
 bool check_busyP(int detectIdx, int nTask)
 {
   //KHCHEN: fix the busyperiod prediction after discussing with Georg
-  //TODO build up the input of x and y.
+  //TODO Syncronize the # of postponed jobs table.
+  int x[11];
+
+  for(i=0; i<nTask; i++)
+  {
+    //call the helper function in RMS manager to get the number of x
+    x[i] = rtems_monotonic_Postponed_num(period_id[i]);
+    if(x[i] < 0)
+      printf("BUG: # of postponed jobs is not positive\n");
+  }
+
 	int sum = 0, i = 0, j=0;
 	double busy = 0, Dn = 0, sumU=0, sumF=0;
 
@@ -110,7 +120,14 @@ bool check_busyP(int detectIdx, int nTask)
               sumU+=(tsk[j].normal_et/tsk[j].period);
               sumF+=(1-tsk[j].normal_et/tsk[j].period)*tsk[j].normal_et;
           }  
-          for(j=detectIdx; j<=i; j++) //(check the ready queue. X is the number of normal instance, Y is the number of abnormal instance.
+          /* KHCHEN 03.08.16
+           * As there is no ready queue, to trace the number of executing jobs (normal or abnormal) 
+           * or postponed jobs (which are only normal), we have to co-work with RMS manager.
+           * If we only trace the number by using the application layer manner, the # of postponed jobs may not be precise in time.
+           * That means, the moment we predicit the deadline misses may lack of the information of the already postponed jobs.
+           */
+
+          for(j=detectIdx; j<=i; j++) //X is the number of postponed jobs from RMS manager.
           {
               if(j == detectIdx)
               {
@@ -118,12 +135,16 @@ bool check_busyP(int detectIdx, int nTask)
               }
               else
               {
-                  if(tsk[j].tsk_type == 0 && x+y >1)
-                      printf("BUG: more than one hard job in the system");
+                  carry_in += x[j]*tsk[j].normal_et;
+                  if(table_value[j]==){
+                    carry_in += tsk[j].abnormal_et;
+                  }
+                  else if(table_value[j]==){
+                    carry_in += tsk[j].normal_et;
+                  }
+                  if(tsk[j].tsk_type == 0 && x[j] > 0)
+                      printf("BUG: hard task is postponed somehow\n");
 
-                  if(tsk[j].tsk_type == 1 && y > 1)
-                      printf("BUG: soft task at most has one abnormal in the system");
-                  carry_in += y*tsk[j].abnormal_et+x*tsk[j].normal_et;
               }
           }
 
