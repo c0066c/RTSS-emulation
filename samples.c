@@ -94,7 +94,7 @@ bool check_busyP(int detectIdx, int nTask)
   //TODO Syncronize the # of postponed jobs table.
   int x[11];
 
-  for(i=0; i<nTask; i++)
+  for(i=detectIdx; i<nTask; i++)
   {
     //call the helper function in RMS manager to get the number of x
     x[i] = rtems_monotonic_Postponed_num(period_id[i]);
