@@ -14,6 +14,9 @@
 #include <stdlib.h>
 #define UT 50
 
+//KHCHEN 03.08 Global table for period ID
+rtems_id period_id[11];
+
 int task_set_idx = 0;
 int task_set_idcheck = 100;
 int running_flag[10] = {0,0,0,0,0,0,0,0,0,0};
@@ -50,6 +53,7 @@ double fault_rate[4] = {0.01, 0.001, 0.0001, 0.00001};
 int start_flag = 0;
 int inittask_count=0;
 double uTotal = (double)UT/100;
+bool AllReady;
 
 tinp taskinput[10];
 
@@ -58,10 +62,8 @@ rtems_task Init(
 )
 {
 	rtems_status_code status;
-	rtems_time_of_day time;
 	int i = 0;
 	int schedulability;
-	double start, end;
  
 	printf("10tasks_1.83hardFactor_1.83softFactor_60.0hardTasksPerc_70uti\nSet 0 to Set 9:\n\n");
 	//printf("10tasks_1.83hardFactor_1.83softFactor_40.0hardTasksPerc_86uti\nSet 10 to Set 19:\n\n");
@@ -72,26 +74,6 @@ rtems_task Init(
 	tick_per_second = rtems_clock_get_ticks_per_second();
 	printf("\nTicks per second in your system: %" PRIu32 "\n", tick_per_second);
 
-// sec_loopCount=LoopCountingForASec(); //for init the relative count
-//	printf("Loop count per second: %i \n\n", sec_loopCount);
-
-/*
-  start = rtems_clock_get_ticks_since_boot() / (double)tick_per_second;
-  LOOP(0.005);
-  end = rtems_clock_get_ticks_since_boot() / (double)tick_per_second;
-  printf("start = %.6f, end = %.6f\n", start, end);
-*/
-/*
-  time.year   = 1988;
-  time.month  = 12;
-  time.day    = 31;
-  time.hour   = 9;
-  time.minute = 0;
-  time.second = 0;
-  time.ticks  = 0;
-
-  status = rtems_clock_set( &time );
-*/
 	#include "10tasks_1.83hardFactor_1.83softFactor_60.0hardTasksPerc_70uti.h"
 	//#include "10tasks_1.83hardFactor_1.83softFactor_40.0hardTasksPerc_86uti_mod.h"
 	//#include "10tasks_1.83hardFactor_1.0softFactor_60.0hardTasksPerc_78uti_mod.h"
@@ -127,28 +109,16 @@ rtems_task Init(
 	  }
 
   while(1){
-#if 0
-		int lcmAmong=(int)tsk[0].period;
-  		for(i=1; i<ntask; i++){
-			lcmAmong=lcm(lcmAmong, (int)tsk[i].period);
-      			printf("\n");
-  		}
-  		testnumber = CEILING_POS((double)lcmAmong / tsk[4].period); //take hyperperiod to setup the lowest priority task
-#else
-    testnumber = 37;
-  		//testnumber = taskinputs[task_set_idx].testnum;
-  		//printf("testnumber %d,", testnumber);
-#endif
 
 		for(i=0; i<ntask; i++){
 			tsk[i].period = taskinput[task_set_idx].tasks[i].period;
-  			//tsk[i].utilization = taskinputs[task_set_idx].tasks[i].utilization;
 			tsk[i].task_type = taskinput[task_set_idx].tasks[i].task_type;
 			tsk[i].normal_et = taskinput[task_set_idx].tasks[i].normal_et;
 			tsk[i].abnormal_et = taskinput[task_set_idx].tasks[i].abnormal_et;
-			//printf("Task %i with normal exe %.1f\n",i,tsk[i].normal_et);
 		}
-  
+    
+    testnumber = (1*60*60*1000/tsk[9].period)+1;
+    printf("testnummer is %i\n",testnumber);
 /************************************************/
 		//printf("Again Declaratioan of variable:\n");
 		sys_totalruntime = 0;
@@ -165,26 +135,14 @@ rtems_task Init(
     task_running_flag = FALSE;
     sys_fault_flag = FALSE;
     sys_stop_flag = FALSE;
-      
+    AllReady = FALSE;
+
 		for(i=0; i<ntask; i++){
 			taskrunning_table[i] = 0;
       tsk[i].priority = -1;
     }
 //      printf("\n\n\n*** NXT TEST %d ***\n", inittask_count);
 
-#if 1
-/*
-  		tsk[0].task_type = 0;
- 		tsk[1].task_type = 0;
-  		tsk[2].task_type = 0;
-  		tsk[3].task_type = 1;
-  		tsk[4].task_type = 1;
-  
-  		inittask_count = 28;
-*/
-#else
-		Exhaustive_Task_Type(ntask, inittask_count, tsk);
-#endif
 
 		schedulability =priority_assignment(tsk, ntask);
 
@@ -360,25 +318,20 @@ rtems_task Init(
         			exit( 1 );
        			}
 
-          		//printf("checkpoint 1.\n");
-      			// delete init task after starting the three working tasks
 			status = rtems_task_suspend(RTEMS_SELF);
-	//	      printf("YES, it is feasible to use suspend/resume on init\n");
 		}
 
 		printf("with fault rate at %.6f rate and task count now is %d. \n",fault_rate[refer_fault_rate],inittask_count);
 		inittask_count+=1;
 		if(refer_fault_rate+1 == 4){
-		//if(refer_fault_rate+1 == 2){
-			printf("checked\n\n");
   			task_set_idx++;
 		}
 		refer_fault_rate= (refer_fault_rate+1)%4;  
-		//refer_fault_rate= (refer_fault_rate+1)%2;
       		//At this moment, the experiment is done; inittask_count for experiment to be finished is number of fault rate to be tested * number of task set
 		//if (inittask_count == 40){
-		if (inittask_count == 1){
+		if (inittask_count == 40){
 			printf("The testing is finished among 40 combinations\n");
+      exit(1);
 			break;
   		}
 	}
