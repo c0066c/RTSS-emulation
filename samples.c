@@ -60,11 +60,10 @@ int LoopCountingForASec(void)
 bool task_fault_check(double factor)
 {
 	int fault_rand;
-	int cfec = factor/tick_per_second;
+	double cfec = factor/tick_per_second;
 	double trial = fault_rate[refer_fault_rate]*100000*cfec;
 
   fault_rand = rand()%100000;
-	  
   if(fault_rand < trial)
       return TRUE; 
   else
@@ -92,17 +91,26 @@ bool check_busyP(int detectIdx, int nTask)
 {
   //KHCHEN: fix the busyperiod prediction after discussing with Georg
   //TODO Syncronize the # of postponed jobs table.
-  int x[11];
+  int x[11], i=0;
 
+  for (i=0; i<11; i++){
+    x[i]=0;
+  }
+ 
   for(i=detectIdx; i<nTask; i++)
   {
     //call the helper function in RMS manager to get the number of x
-    x[i] = rtems_monotonic_Postponed_num(period_id[i]);
+    x[i] = _Rate_monotonic_Postponed_num(period_id[i]);
     if(x[i] < 0)
       printf("BUG: # of postponed jobs is not positive\n");
   }
 
-	int sum = 0, i = 0, j=0;
+  for (i=0; i<11; i++){
+    printf("%d,",x[i]);
+  }
+  printf("\n");
+
+	int sum = 0, j=0;
 	double busy = 0, Dn = 0, sumU=0, sumF=0;
 
 	for(i=detectIdx; i<nTask; i++) //test from detectIdx to so-on, as detectIdx task is affected.
@@ -114,7 +122,6 @@ bool check_busyP(int detectIdx, int nTask)
           Dn = tsk[i].period;
           sumU=0;
           sumF=0;
-          //virtual task k' Ck'=Gk
           for(j=0; j<=i; j++)//calculate all high priority tasks' properties + itself
           {
               sumU+=(tsk[j].normal_et/tsk[j].period);
@@ -136,20 +143,19 @@ bool check_busyP(int detectIdx, int nTask)
               else
               {
                   carry_in += x[j]*tsk[j].normal_et;
-                  if(table_value[j]==){
+                  if(taskrunning_table[j]== 2){
                     carry_in += tsk[j].abnormal_et;
                   }
-                  else if(table_value[j]==){
+                  else if(taskrunning_table[j]== 1){
                     carry_in += tsk[j].normal_et;
                   }
-                  if(tsk[j].tsk_type == 0 && x[j] > 0)
+                  if(tsk[j].task_type == 0 && x[j] > 0)
                       printf("BUG: hard task is postponed somehow\n");
 
               }
           }
 
           busy = (carry_in+sumF)/(1-sumU); //eq. 6
-            
           if(busy > Dn) //if WCRT in the busy period is larger than the task deadline, mark it as suspecious.
               sp_dl_missed_table[i]=1;
       }
@@ -160,8 +166,9 @@ bool check_busyP(int detectIdx, int nTask)
 	if(sum == 0){
       return TRUE;
 	}
-	else
+	else{
       return FALSE;
+  }
 
 }
 
@@ -534,13 +541,12 @@ int check_running_task(int* suspendedTask){
 	int numberPreemptedTask = 0;
 
 	for(j=0; j<ntask; j++){
-      numberPreemptedTask += taskrunning_table[j];
 		
-      if(taskrunning_table[j] == 1){
+      if(taskrunning_table[j] > 0){
           suspendedTask[i] = j;
           i++;
       }
 	}
-	
+  numberPreemptedTask = i;
 	return numberPreemptedTask;
 }

@@ -116,8 +116,8 @@ extern int refer_fault_rate;
 extern int start_flag;
 extern int experiment_flag;
 extern double uTotal;
-
-
+extern rtems_id period_id[11];
+extern bool AllReady;
 
 /* configuration information */
 
@@ -197,19 +197,21 @@ extern double uTotal;
   int now = 0; \
   int elapsedTick = 0; \
   int tmp = _et;\
-  int debug = 0;\
-  int buf = 0;\
-  \
+/*  int debug = 0;\
+*/  \
   start = rtems_clock_get_ticks_since_boot();\
+  \
   while(1){\
 	\
     now = rtems_clock_get_ticks_since_boot();\
  	  if(preempted_table[0][taskID]!=0){	\
 		  now = rtems_clock_get_ticks_since_boot();\
-/*		printf("		preempted_table[1][%i] is %i\n",taskID,preempted_table[1][taskID]); \
-		printf("		start is %i,tmp is %i\n",start,tmp); \
+/*      if(taskID ==0){\
+		    printf("		preempted_table[1][%i] is %i\n",taskID,preempted_table[1][taskID]); \
+		    printf("		start is %i,tmp is %i\n",start,tmp);} \
 */		elapsedTick = preempted_table[1][taskID]- start;	\
-		  tmp = tmp - elapsedTick; \
+/*      printf("elapsedTick is %d\n",elapsedTick);\
+*/		  tmp = tmp - elapsedTick; \
 		  start = now; \
 /*		printf("		elapsed is %i, remaing tmp is %i\n",elapsedTick, tmp);\
 */		preempted_table[0][taskID] = 0; \
@@ -218,40 +220,20 @@ extern double uTotal;
 		debug = 1;\
 */	}\
 	\
-/*	if(debug == 1){\
+/*   if(taskID == 0){\
 		if(now - buf >0){\
-			printf("		    current tick is %i\n",now);\
+			printf("tmp is %d and  current tick is %d\n",tmp,now);\
 			buf = now;\
 		}\
 	}\
 */	\
 	  if(now-start >= tmp){\
-/* 		printf("		now %i -start %i>=tmp %i!!!\n",now,start,tmp);\
+/*		    printf("		now %i -start %i>=tmp %i!!!\n",now,start,tmp);\
 */	  	break;\
      }\
    }\
  }
 
-
-#define LOOP2(_et){ \
-  int loopInterLoop = 0, loopcount = 0, totalloop; \
-  int tmp = _et*sec_loopCount;\
-  \
-  while(1){\
-	loopInterLoop+=1;\
-	if(loopInterLoop > 500000){\
-	    loopcount+=1;\
-	    loopInterLoop = 0;\
-	}\
-	totalloop = loopcount*500000 + loopInterLoop;\
-	rtems_clock_get_ticks_since_boot();\
-	if(totalloop == tmp){\
-	    loopcount = 0; \
-	    loopInterLoop = 0; \
-	    break;\
-	}\
-     }\
-   }
 /*
  *  This allows us to view the "Test_task" instantiations as a set
  *  of numbered tasks by eliminating the number of application

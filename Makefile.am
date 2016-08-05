@@ -7,8 +7,8 @@ schbility_SOURCES = system.h \
 	samples.c \
 	uunifast.c
 
-dist_rtems_tests_DATA = schbility.scn
-dist_rtems_tests_DATA += schbility.doc
+#dist_rtems_tests_DATA = schbility.scn
+#dist_rtems_tests_DATA += schbility.doc
 
 include $(RTEMS_ROOT)/make/custom/@RTEMS_BSP@.cfg
 include $(top_srcdir)/../automake/compile.am
