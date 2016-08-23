@@ -62,6 +62,7 @@ rtems_task Init(
 )
 {
 	rtems_status_code status;
+	rtems_time_of_day time;
 	int i = 0;
 	int schedulability;
  
@@ -75,6 +76,18 @@ rtems_task Init(
 	printf("\nTicks per second in your system: %" PRIu32 "\n", tick_per_second);
 
 	#include "10tasks_1.83hardFactor_1.83softFactor_60.0hardTasksPerc_70uti.h"
+
+  time.year   = 1988;
+  time.month  = 12;
+  time.day    = 31;
+  time.hour   = 9;
+  time.minute = 0;
+  time.second = 0;
+  time.ticks  = 0;
+
+  status = rtems_clock_set( &time );
+
+  srand(time(NULL));
 	//#include "10tasks_1.83hardFactor_1.83softFactor_40.0hardTasksPerc_86uti_mod.h"
 	//#include "10tasks_1.83hardFactor_1.0softFactor_60.0hardTasksPerc_78uti_mod.h"
 	//#include "10tasks_1.08hardFactor_1.08softFactor_60.0hardTasksPerc_92uti_mod.h"	
