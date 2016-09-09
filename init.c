@@ -18,14 +18,12 @@
 rtems_id period_id[11];
 
 int task_set_idx = 0;
-int task_set_idcheck = 100;
-int running_flag[10] = {0,0,0,0,0,0,0,0,0,0};
-int experiment_flag = 0;
+int running_flag[10] = {0,0,0,0,0,0,0,0,0,0};  //0: task is deleted, 1: task is created
+int experiment_flag = 0;  //0: the simulation is stopped as termination criterion is met, 1: simulaton is started after all tasks are created
 rtems_id inittask_id;
 rtems_id Task_id[ 11 ];
 rtems_name Task_name[ 11 ];
 uint32_t tick_per_second;
-int sec_loopCount=0;
 bool task_running_flag = FALSE;
 bool sys_fault_flag = FALSE;
 bool sys_stop_flag = FALSE;
@@ -37,23 +35,20 @@ double sys_healthy_duration = 0;
 double sys_unhealthy_duration = 0;
 double sys_healthy_total_duration = 0;
 double sys_unhealthy_total_duration = 0;
-int taskrunning_table[10];
-int preempted_table[2][10];
-double deltastart_table[10];
-int sp_dl_missed_table[10];
-double d_t[10];
+int taskrunning_table[10];    //0: task is not running, 1: task is running in normal system mode, 2: task is running in system fault mode
+int preempted_table[2][10];   //2D table that save task being preempted, first row is task id, second row: 1 mean preempted, 0 mean not.
+int sp_dl_missed_table[10];   // table that save the task that might miss the deadline from check_busy_P function
 attri tsk[10];
 int ntask = 10;
-int testnumber = 1; //TODO: change to hyperperiod? or the number of lowest priority task
+int testnumber = 1; //Termination criterion for each simulaton
 double sys_totalruntime = 0;
 double sys_totalhealthy_percentage = 0;
 double sys_totalunhealthy_percentage = 0;
 int refer_fault_rate = 0;
-double fault_rate[4] = {0.01, 0.001, 0.0001, 0.00001};
-int start_flag = 0;
+double fault_rate[4] = {0.03, 0.003, 0.0003, 0.00003};
 int inittask_count=0;
-double uTotal = (double)UT/100;
 bool AllReady;
+int seedseed = 5;   //seed for random
 
 tinp taskinput[10];
 
@@ -64,18 +59,13 @@ rtems_task Init(
 	rtems_status_code status;
 	rtems_time_of_day time;
 	int i = 0;
-	int schedulability;
  
-	printf("10tasks_1.83hardFactor_1.83softFactor_60.0hardTasksPerc_70uti\nSet 0 to Set 9:\n\n");
-	//printf("10tasks_1.83hardFactor_1.83softFactor_40.0hardTasksPerc_86uti\nSet 10 to Set 19:\n\n");
-	//printf("10tasks_1.83hardFactor_1.0softFactor_60.0hardTasksPerc_78uti\nSet 10 to Set 19:\n\n");
-	//printf("10tasks_1.08hardFactor_1.08softFactor_60.0hardTasksPerc_92uti\nSet 0 to Set 9:\n\n");
-	//printf("10tasks_2.83hardFactor_2.83softFactor_60.0hardTasksPerc_50uti\nSet 0 to Set 9:\n\n");
+	printf("10tasks_1.83hardFactor_1.83softFactor_50.0hardTasksPerc_70uti\nSet 30 to Set 39:\n\n");
 
 	tick_per_second = rtems_clock_get_ticks_per_second();
 	printf("\nTicks per second in your system: %" PRIu32 "\n", tick_per_second);
 
-	#include "10tasks_1.83hardFactor_1.83softFactor_60.0hardTasksPerc_70uti.h"
+	#include "10tasks_1.83hardFactor_1.83softFactor_50.0hardTasksPerc_70uti.h"
 
   time.year   = 1988;
   time.month  = 12;
@@ -87,13 +77,6 @@ rtems_task Init(
 
   status = rtems_clock_set( &time );
 
-  srand(time(NULL));
-	//#include "10tasks_1.83hardFactor_1.83softFactor_40.0hardTasksPerc_86uti_mod.h"
-	//#include "10tasks_1.83hardFactor_1.0softFactor_60.0hardTasksPerc_78uti_mod.h"
-	//#include "10tasks_1.08hardFactor_1.08softFactor_60.0hardTasksPerc_92uti_mod.h"	
-	//#include "10tasks_2.83hardFactor_2.83softFactor_60.0hardTasksPerc_50uti_mod.h"
-	
-	
   	Task_name[ 1 ] = rtems_build_name( 'T', 'A', '1', ' ' );
   	Task_name[ 2 ] = rtems_build_name( 'T', 'A', '2', ' ' );
   	Task_name[ 3 ] = rtems_build_name( 'T', 'A', '3', ' ' );
@@ -109,8 +92,6 @@ rtems_task Init(
 		  taskrunning_table[i] = 0;
 		  preempted_table[0][i] = 0;
 		  preempted_table[1][i] = 0;
-		  deltastart_table[i] = 0;
-     	d_t[i] = 0;
     	sp_dl_missed_table[i] = 0;
    		tsk[i].period = 0;
    		tsk[i].utilization = 0;
@@ -131,9 +112,8 @@ rtems_task Init(
 		}
     
     testnumber = (1*60*60*1000/tsk[9].period)+1;
-    printf("testnummer is %i\n",testnumber);
 /************************************************/
-		//printf("Again Declaratioan of variable:\n");
+		//Initialization of system variables for each simulation
 		sys_totalruntime = 0;
 	  sys_totalhealthy_percentage = 0;
 		sys_totalunhealthy_percentage = 0;
@@ -149,24 +129,12 @@ rtems_task Init(
     sys_fault_flag = FALSE;
     sys_stop_flag = FALSE;
     AllReady = FALSE;
-
+    
 		for(i=0; i<ntask; i++){
-			taskrunning_table[i] = 0;
-      tsk[i].priority = -1;
+			taskrunning_table[i] = 0; 
     }
-//      printf("\n\n\n*** NXT TEST %d ***\n", inittask_count);
 
-
-		schedulability =priority_assignment(tsk, ntask);
-
-		if(schedulability == -1){
-			printf("x\n");
-//         		printf("Tasks are not schedulable.\nThis Operation will skip immediately.\n");	 
-    }else{
-    	if(task_set_idcheck != task_set_idx){
-				printf("Current task set is set %d. \n",task_set_idx);
-				task_set_idcheck = task_set_idx;
-			}
+		priority_assignment(tsk, ntask);
 
 			status = rtems_task_create(
 				Task_name[ 1 ], tsk[0].priority, RTEMS_MINIMUM_STACK_SIZE * 2, RTEMS_DEFAULT_MODES,
@@ -332,17 +300,17 @@ rtems_task Init(
        			}
 
 			status = rtems_task_suspend(RTEMS_SELF);
-		}
 
 		printf("with fault rate at %.6f rate and task count now is %d. \n",fault_rate[refer_fault_rate],inittask_count);
 		inittask_count+=1;
-		if(refer_fault_rate+1 == 4){
+		if(refer_fault_rate+1 == 2){
   			task_set_idx++;
+        seedseed = seedseed + 20;
+        printf("\n");
 		}
-		refer_fault_rate= (refer_fault_rate+1)%4;  
+		refer_fault_rate= (refer_fault_rate+1)%2;  
       		//At this moment, the experiment is done; inittask_count for experiment to be finished is number of fault rate to be tested * number of task set
-		//if (inittask_count == 40){
-		if (inittask_count == 40){
+		if (inittask_count == 20){
 			printf("The testing is finished among 40 combinations\n");
       exit(1);
 			break;

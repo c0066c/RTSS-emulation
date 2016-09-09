@@ -4,8 +4,7 @@ schbility_SOURCES = system.h \
 	init.c \
 	tasks.c	\
 	samples.h \
-	samples.c \
-	uunifast.c
+	samples.c 
 
 #dist_rtems_tests_DATA = schbility.scn
 #dist_rtems_tests_DATA += schbility.doc

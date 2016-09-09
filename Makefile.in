@@ -81,7 +81,7 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(rtems_testsdir)"
 PROGRAMS = $(rtems_tests_PROGRAMS)
 am_schbility_OBJECTS = init.$(OBJEXT) tasks.$(OBJEXT) \
-	samples.$(OBJEXT) uunifast.$(OBJEXT)
+	samples.$(OBJEXT)
 schbility_OBJECTS = $(am_schbility_OBJECTS)
 schbility_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
@@ -231,8 +231,7 @@ schbility_SOURCES = system.h \
 	init.c \
 	tasks.c	\
 	samples.h \
-	samples.c \
-	uunifast.c
+	samples.c 
 
 AM_CPPFLAGS = 
 AM_CFLAGS = 
@@ -328,7 +327,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/init.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/samples.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tasks.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/uunifast.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

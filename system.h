@@ -87,7 +87,6 @@ extern rtems_name Task_name[ 11 ];       /* array of task names */
 extern rtems_id   Sem_id;               /* Semaphore id */
 extern rtems_id   inittask_id;
 extern uint32_t tick_per_second;
-extern int sec_loopCount;
 extern bool task_running_flag;
 extern bool sys_fault_flag;
 extern bool sys_stop_flag;
@@ -104,20 +103,17 @@ extern double sys_totalhealthy_percentage;
 extern double sys_totalunhealthy_percentage;
 extern int preempted_table[2][10];
 extern int taskrunning_table[10];
-extern double deltastart_table[10];
 extern int sp_dl_missed_table[10];
-extern double d_t[10];
 extern attri tsk[10];
 extern int ntask;
 extern int testnumber;
 //extern double fault_rate[4];
 extern double fault_rate[4];
 extern int refer_fault_rate;
-extern int start_flag;
 extern int experiment_flag;
-extern double uTotal;
 extern rtems_id period_id[11];
 extern bool AllReady;
+extern int seedseed;
 
 /* configuration information */
 
@@ -197,8 +193,7 @@ extern bool AllReady;
   int now = 0; \
   int elapsedTick = 0; \
   int tmp = _et;\
-/*  int debug = 0;\
-*/  \
+  \
   start = rtems_clock_get_ticks_since_boot();\
   \
   while(1){\
@@ -206,30 +201,14 @@ extern bool AllReady;
     now = rtems_clock_get_ticks_since_boot();\
  	  if(preempted_table[0][taskID]!=0){	\
 		  now = rtems_clock_get_ticks_since_boot();\
-/*      if(taskID ==0){\
-		    printf("		preempted_table[1][%i] is %i\n",taskID,preempted_table[1][taskID]); \
-		    printf("		start is %i,tmp is %i\n",start,tmp);} \
-*/		elapsedTick = preempted_table[1][taskID]- start;	\
-/*      printf("elapsedTick is %d\n",elapsedTick);\
-*/		  tmp = tmp - elapsedTick; \
+  		elapsedTick = preempted_table[1][taskID]- start;	\
+		  tmp = tmp - elapsedTick; \
 		  start = now; \
-/*		printf("		elapsed is %i, remaing tmp is %i\n",elapsedTick, tmp);\
-*/		preempted_table[0][taskID] = 0; \
+  		preempted_table[0][taskID] = 0; \
 		  preempted_table[1][taskID] = 0;\
-/*		printf("		newStart is %i\n",start);\
-		debug = 1;\
-*/	}\
-	\
-/*   if(taskID == 0){\
-		if(now - buf >0){\
-			printf("tmp is %d and  current tick is %d\n",tmp,now);\
-			buf = now;\
-		}\
-	}\
-*/	\
+    }\
 	  if(now-start >= tmp){\
-/*		    printf("		now %i -start %i>=tmp %i!!!\n",now,start,tmp);\
-*/	  	break;\
+      break;\
      }\
    }\
  }

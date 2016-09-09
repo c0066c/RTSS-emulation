@@ -1,9 +1,8 @@
-//Number of Tasks: 10
+//NUMBer of Tasks: 10
 //HardTask Percentage: 50.0
 //HardTask WCET Factor: 1.8333333333333335
 //SoftTask WCET Factor: 1.8333333333333335
-
-
+/*
 //Set: 0
 taskinput[0].tasks[0].period=7010.0;
 taskinput[0].tasks[1].period=3980.0;
@@ -98,6 +97,8 @@ taskinput[2].tasks[5].period=55660.0;
 taskinput[2].tasks[6].period=56870.0;
 taskinput[2].tasks[7].period=59800.0;
 taskinput[2].tasks[8].period=18870.0;
+taskinput[2].tasks[9].period=94820.0;
+taskinput[2].tasks[0].normal_et=40.0;
 taskinput[2].tasks[9].period=94820.0;
 taskinput[2].tasks[0].normal_et=40.0;
 taskinput[2].tasks[1].normal_et=480.0;
@@ -423,6 +424,7 @@ taskinput[9].tasks[6].task_type=0;
 taskinput[9].tasks[7].task_type=1;
 taskinput[9].tasks[8].task_type=1;
 taskinput[9].tasks[9].task_type=1;
+
 
 //Set: 10
 taskinput[0].tasks[0].period=3300.0;
@@ -844,6 +846,7 @@ taskinput[9].tasks[7].task_type=1;
 taskinput[9].tasks[8].task_type=1;
 taskinput[9].tasks[9].task_type=1;
 
+
 //Set: 20
 taskinput[0].tasks[0].period=1440.0;
 taskinput[0].tasks[1].period=6830.0;
@@ -1263,6 +1266,7 @@ taskinput[9].tasks[6].task_type=1;
 taskinput[9].tasks[7].task_type=0;
 taskinput[9].tasks[8].task_type=1;
 taskinput[9].tasks[9].task_type=1;
+*/
 
 //Set: 30
 taskinput[0].tasks[0].period=2910.0;
@@ -1683,7 +1687,7 @@ taskinput[9].tasks[6].task_type=0;
 taskinput[9].tasks[7].task_type=0;
 taskinput[9].tasks[8].task_type=1;
 taskinput[9].tasks[9].task_type=1;
-
+/*
 //Set: 40
 taskinput[0].tasks[0].period=5070.0;
 taskinput[0].tasks[1].period=4230.0;
@@ -1893,4 +1897,4 @@ taskinput[4].tasks[6].task_type=0;
 taskinput[4].tasks[7].task_type=0;
 taskinput[4].tasks[8].task_type=1;
 taskinput[4].tasks[9].task_type=1;
-
+*/
