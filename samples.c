@@ -16,6 +16,11 @@
 #define CEILING(X) ( ((X) > 0) ? CEILING_POS(X) : CEILING_NEG(X) )
 #define ABS(X)((X)>=0)? X : (X*-1)
 
+/* Determine whether the task is faulty with percentage-wise relatively to its normal execution time
+ * Longer execution time will lead to higher possibilty of faulty
+ * under the assumption that at every time unit, the task have chance to be faulty with the given system fault-rate
+ * 
+ */
 bool task_fault_check(double factor)
 {
 	int fault_rand;
@@ -30,6 +35,8 @@ bool task_fault_check(double factor)
       return FALSE;
 }
 
+/* Check if the faulty task will cause the system to become unhealthy
+ * */
 bool check_busyP(int detectIdx, int nTask)
 {
   //KHCHEN: fix the busyperiod prediction after discussing with Georg
@@ -47,11 +54,6 @@ bool check_busyP(int detectIdx, int nTask)
     if(x[i] < 0)
       printf("BUG: # of postponed jobs is not positive\n");
   }
-
-  //for (i=0; i<11; i++){
-    //printf("%d,",x[i]);
-  //}
-  //printf("\n");
 
 	int sum = 0, j=0;
 	double busy = 0, Dn = 0, sumU=0, sumF=0;
@@ -115,13 +117,16 @@ bool check_busyP(int detectIdx, int nTask)
 
 }
 
+/* Check if the task will miss deadline
+ * */
 bool check_deadline(bool* first_task_flag , int nTask, double deadline, double end, int task_type, int task_id, double tick_per_second)
 {
 	int i = 0;
 	int check_task_dl = 0;
 	double sys_turn_healthy;
 
-	if(sys_stop_flag != TRUE){	
+	if(sys_stop_flag != TRUE){
+    /* Case 1: task does not miss deadline or task missed deadline but it is soft real time task*/  
 		if(end <= deadline || (end > deadline && task_type == 1)){
 			if(end > deadline && task_type == 1){
 				sp_dl_missed_table[task_id] = 1;
@@ -165,7 +170,7 @@ bool check_deadline(bool* first_task_flag , int nTask, double deadline, double e
 				}
 			}
 				return FALSE;
-		}else if(end > deadline && task_type == 0){
+		}else if(end > deadline && task_type == 0){  /* Case 2: Hard real time task missed its deadline */
 			printf("Hard real-time Task %d has missed its deadline and whole system will be shut down. \n", task_id+1);
 
 			if(sys_fault_flag == TRUE){
@@ -189,16 +194,9 @@ bool check_deadline(bool* first_task_flag , int nTask, double deadline, double e
 	} 
 }
 
-void priority_assignment(attri* tasks, int nTask)
-{
-  //assume the given input is already assigned priority.
-	int i =0;
-	for(i=0; i<nTask; i++){
-		tasks[i].id=i; //very important
-		tasks[i].priority=i+1;
-	}
-}
-
+/* Determine which task is running
+ * return the number of preempted task
+ * */
 int check_running_task(int* suspendedTask){
 	int j = 0;
 	int i = 0;
