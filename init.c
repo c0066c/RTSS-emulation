@@ -45,10 +45,15 @@ double sys_totalruntime = 0;
 double sys_totalhealthy_percentage = 0;
 double sys_totalunhealthy_percentage = 0;
 int refer_fault_rate = 0;
-double fault_rate[4] = {0.03, 0.003, 0.0003, 0.00003};  /*Fault rate for the simulation*/
 int inittask_count=0;  /*Criteria to stop this experiment which consists of several simulations that running iteratively*/
 bool AllReady;       /*Flag to indicate whether all tasks 1 to 10 are created, simulation only starts after all tasks are created and ready to run, as RTEMS normally create 1 task and execute it immediately, the next task will only be created after the previous task has finished its execution*/
 int seedseed = 5;   /*seed for random, to create different random value for each task, without this, all task will read the same random page and have same random value at same random count in each task*/
+
+//User Setting
+int iterative_run = 40;
+double fault_rate[4] = {0.01, 0.001, 0.0001, 0.00001};  /*Fault rate for the simulation*/
+int number_of_used_fault_rate = 4; /*must be identical to the number of fault rate in array fault_rate*/
+int sim_duration = 1; /*The length of each simulaiton duration (in hour)*/
 
 tinp taskinput[10];
 
@@ -113,7 +118,7 @@ rtems_task Init(
 			tsk[i].abnormal_et = taskinput[task_set_idx].tasks[i].abnormal_et;
 		}
     
-    testnumber = (1*60*60*1000/tsk[9].period)+1;
+    testnumber = (sim_duration*60*60*1000/tsk[9].period)+1;
 
 		/*Reinitialize all variables and flags after one simulation*/
 		sys_totalruntime = 0;
@@ -306,15 +311,15 @@ rtems_task Init(
 
 		printf("with fault rate at %.6f rate and task count now is %d. \n",fault_rate[refer_fault_rate],inittask_count);
 		inittask_count+=1;
-		if(refer_fault_rate+1 == 2){
+		if(refer_fault_rate+1 == number_of_used_fault_rate){
   			task_set_idx++;
         seedseed = seedseed + 20;
         printf("\n");
 		}
-		refer_fault_rate= (refer_fault_rate+1)%2;  
+		refer_fault_rate= (refer_fault_rate+1)%number_of_used_fault_rate;  
   
-		if (inittask_count == 20){
-			printf("The testing is finished among 40 combinations\n");
+		if (inittask_count == iterative_run){
+			printf("The experiment ends.\n");
       exit(1);
 			break;
   	}
